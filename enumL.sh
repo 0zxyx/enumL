@@ -1,202 +1,220 @@
-echo ""
+echo 
 echo '======================================================================================'
-echo ""
+echo 
 echo "=========================== Coded by 0zxyx ==========================================="
-echo ""
+echo 
 echo '======================================================================================'
-echo ""
+echo 
 
 
 updatedb 2>/dev/null
 
 sudo -l
 
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo ""
 
+echo 
 whoami
 
-sleep 1
-echo ""
+
+echo 
 id
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Who Is Logged On"
-echo ""
+echo 
 w
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Crontabs"
-echo ""
+echo 
+echo "Grabbing Crontabs and Systemctl Timers"
+echo 
+crontab  -l
 cat /etc/crontab
+ls -la /var/spool/cron/crontabs/
+systemctl list-timers
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
+echo "Grabbing /etc/hosts"
+echo 
+cat /etc/hosts
+
+
+echo 
 echo "Grabbing Mail"
-echo ""
+echo 
 ls -la /var/mail
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Listing Sockets"
-echo ""
+echo 
 ss -altp
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Current Processes"
-echo ""
+echo 
 ps -ef
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Can $(whoami) Read Shadow"
-echo ""
+echo 
 cat /etc/shadow
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
+echo "Can $(whoami) Write to Password"
+echo 
+getfacl /etc/passwd
+attr -l /etc/passwd
+
+
+echo 
 echo "Grabbing System Capabilities"
-echo ""
+echo 
 capsh --print |sed 's/,/\r\n/g' |grep cap_sys_module
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Custom Systemd Services"
-echo ""
+echo 
 find /etc/systemd/system  /usr/lib/systemd/system -type f  -printf "%T+ %p\n" |grep -v "00000000"
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Users With Shell"
-echo ""
+echo 
 cat /etc/passwd | grep -v "nologin\|false\|sync"
-echo ""
+echo 
 echo "Try su With Password"
 for i in $(cat /etc/passwd | grep -v "nologin\|false\|sync" | awk -F: '{print $1}'); do echo su $i ; done
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing Setuid Files"
-echo ""
+echo 
 find / -perm -4000 2>/dev/null
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing Capabilities"
-echo ""
+echo 
 getcap -r / 2>/dev/null
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Files Drop By Users Inside /usr/sbin/ /usr/bin /sbin /bin"
-echo ""
-for i in /usr/sbin/ /usr/bin /sbin /bin ; do find $i -type f  -printf "%T+ %p\n"  |grep -v 00000000;done
+echo 
+echo "Grabbing Files Drop By Users Inside /usr/local/sbin/ /usr/sbin/ /usr/bin /sbin /bin"
+echo 
+for i in /usr/local/sbin/ /usr/sbin/ /usr/bin /sbin /bin ; do find $i -type f  -printf "%T+ %p\n"  |grep -v 00000000;done
 
 
-
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing /"
-echo ""
+echo 
 ls -la / |grep -v 'bin\|dev\|home\|initrd.img.old\|lib32\|libx32\|media\|opt\|sbin\|sys\|usr\|vmlinuz\|boot\|etc\|initrd.img\|lib\|lib64\|lost+found\|mnt\|proc\|run\|srv\|tmp\|var\|vmlinuz.old\|cdrom\|snap'
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing /var/backups"
-echo ""
+echo 
 ls -la /var/backups
 
 
-
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing $(whoami) Group(s) Files"
-echo ""
+echo 
 for i in `groups` ;do find / -type f -group $i -ls 2>/dev/null |grep -v '/sys\|/proc\|/run'; done 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Files $(whoami) Own"
-echo ""
-find / -user $(whoami) 2> /dev/null  | grep -v '/run\|/sys\|/proc'
+echo 
+find / -type f -user $(whoami) 2> /dev/null  | grep -v '/run\|/sys\|/proc'
 
 
-
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing $(whoami) Config Files From /etc"
-echo ""
+echo 
 grep $(whoami) /etc -R 2>/dev/null
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing /opt  Limited to 100"
-echo ""
-find /opt |head -n 100
+echo 
+find /opt -type f |head -n 100
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing /var/www/  Limited to 100"
-echo ""
-find /var/www/  |head -n 100
+echo 
+find /var/www/ -type f |head -n 100
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Passwords From /var/www"
-echo ""
-grep --exclude={*.css,*.js,*.js.map,*.css.map,*.min.map,*.svg} -ri 'pwd\|passwd\|password\|dbuser\|dbpass\|PWD\|PASSWD\|PASSWORD' /var/www 2>/dev/null
+echo 
+echo "Grabbing Passwords From /var/www, /home, /etc"
+echo 
+grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg} -ri 'pwd\|passwd\|password\|dbuser\|dbpass\|dbpwd\|PWD\|credential\|token' /var/www /home/ /etc 2>/dev/null
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+
+echo 
 echo "Grabbing Files Named passwd ,password ,cred.txt ,credential.txt"
-echo ""
+echo 
 find / -type f  \( -iname "passwd" -o -iname "password" -o -iname "cred.txt" -o -iname "credential.txt" \)  2>/dev/null
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Hashes Inside Files (comming soon)"
-echo ""
+
+echo 
+echo "Grabbing env"
+echo 
+env
 
 
-
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
+echo 
 echo "Grabbing /home"
-echo ""
+echo 
 ls -la /home
 
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Users Files"
-echo ""
-for i in $(ls  /home); do find /home/$i ;echo ; done
+echo 
+echo "Grabbing Users Files Limited to 100"
+echo 
+for i in $(ls  /home); do find /home/$i -type f |head -n 100 ;echo ; done
 
 
+echo 
+echo "Grabbing Users RC Files"
+echo 
+for i in $(ls  /home); do ls -la /home/$i |grep 'rc$' ;echo ; done
 
-sleep 1
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo ""
+
+echo 
+echo "Grabbing / For id_rsa ,.env Files"
+echo 
+find / -type f  \( -iname "id_rsa" -o -iname ".env" \)  2>/dev/null
+
+
+echo 
+echo "Grabbing / For PRIVATE KEY Files"
+echo
+grep -r 'BEGIN OPENSSH PRIVATE KEY\|BEGIN RSA PRIVATE KEY' / 2>/dev/null
+
+
+echo 
+echo "Grabbing Hashes Inside Files (Comming Soon)"
+echo 
+
+
 
 start_year=$(stat /etc/passwd |grep Modify |awk '{print $2}' | awk -F"-" '{print $1}')
 start_month=$(stat /etc/passwd |grep Modify |awk '{print $2}' | awk -F"-" '{print $2}')
 start_date=$(stat /etc/passwd |grep Modify |awk '{print $2}' | awk -F"-" '{print $3}')
 
+
+echo 
 echo "Grabbing Files Using /etc/passwd Date: $start_year-$start_month-$start_date"
-echo ""
+echo 
 sleep 3
 
 if [ "$start_month" -gt 11 ]
@@ -207,7 +225,7 @@ then
                 fdate=$start_year-$start_month-$start_date
                 sdate=$start_year-$start_month-$end_date
                 echo "find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null"
-		echo ""
+		echo 
                 sleep 2
                 find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null
         else
@@ -218,7 +236,7 @@ then
                 fdate=$start_year-$start_month-$start_date
                 sdate=$end_year-$end_month-$end_date
                 echo "find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null"
-		echo ""
+		echo 
                 sleep 2
                 find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null
         fi
@@ -229,7 +247,7 @@ then
         fdate=$start_year-$start_month-$start_date
         sdate=$start_year-$start_month-$end_date
         echo "find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null"
-	echo ""
+	echo 
         sleep 2
         find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null
 else
@@ -239,19 +257,16 @@ else
         fdate=$start_year-$start_month-$start_date
         sdate=$start_year-$end_month-$end_date
         echo "find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null"
-	echo ""
+	echo 
         sleep 2
         find / -type f -newermt $fdate ! -newermt $sdate -ls  2>/dev/null
 fi
 
 
-eval printf '=%.0s' {1..$(stty size | cut -d' ' -f2)}
-echo "Grabbing Files $(whoami) Can Read"
-read -n 1 -s -r -p "Press any key to continue..."
-echo ""
-find / -readable  2> /dev/null  | grep -v '/run\|/sys\|/proc\|/usr\|/boot\|/snap\|/etc'
-
-
-
+echo 
+echo "Grabbing Files/Directory $(whoami) Can Read/Write"
+echo 
+find / -type f -readable  2> /dev/null  | grep -v '/run\|/sys\|/proc\|/usr\|/boot\|/snap\|/etc'
+find / -writable  2> /dev/null
 
 
