@@ -7,8 +7,6 @@ echo '==========================================================================
 echo 
 
 
-updatedb 2>/dev/null
-
 sudo -l
 
 
@@ -27,9 +25,10 @@ ip a
 
 
 echo 
-echo "Grabbing ARP Cache"
+echo "Grabbing ARP Cache/Ip Neighbors"
 echo
 arp -a
+ip neigh
 
 
 echo 
@@ -118,6 +117,12 @@ for i in $(cat /etc/passwd | grep -v "nologin\|false\|sync" | awk -F: '{print $1
 
 
 echo 
+echo "Grabbing Users Groups"
+echo 
+for i in `cat /etc/passwd | grep "sh$" |cut -d':' -f 1`;do id $i;done
+
+
+echo 
 echo "Grabbing Setuid Files"
 echo 
 find / -perm -4000 2>/dev/null
@@ -154,9 +159,11 @@ find /usr/local/sbin /usr/local/bin /usr/sbin /usr/bin -writable  2>/dev/null
 
 
 echo 
-echo "Can $(whoami) Write Inside /etc/systemd/system/"
+echo "Can $(whoami) Write Inside /etc/systemd/system/ /usr/lib/"
 echo 
-find /etc/systemd/system/ -writable
+find /etc/systemd/system/ -writable 2>/dev/null
+echo
+find /usr/lib/ -writable 2>/dev/null
 
 
 echo 
@@ -196,21 +203,27 @@ find /opt -type f |head -n 100
 
 
 echo 
+echo "Grabbing Enabled apache/nginx Sites"
+echo 
+ls -la /etc/apache2/sites-enabled/ /etc/nginx/sites-enabled/
+
+
+echo 
 echo "Grabbing /var/www/  Limited to 100"
 echo 
 find /var/www/ -type f |head -n 100
 
 
 echo 
-echo "Grabbing Config Files From /var/www/"
+echo "Grabbing Config/db Files From /var/www/"
 echo 
-find /var/www/ -iname *config.* 2>/dev/null
+find /var/www/ \( -iname "*config.*" -o -iname "*db.*" \)  2>/dev/null
 
 
 echo 
 echo "Grabbing Passwords From /var/www, /home, /etc"
 echo 
-grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg}  -RioE '.{0,30}(pwd|passwd|password|dbuser|db_user|user|db_password|db_passwd|dbpass|dbpwd|database_pass|PWD|credential|token|postgresql).{0,30}' /home /var/www /etc /opt 2>/dev/null
+grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg}  -RioE '.{0,30}(pwd|passwd|password|dbuser|db_user|user|db_password|db_passwd|dbpass|dbpwd|database_pass|PWD|credential|token|postgresql|key).{0,30}' /home /var/www /etc /opt 2>/dev/null
 
 
 echo 
@@ -226,9 +239,9 @@ grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg} -RioE '.{0,30}(system|
 
 
 echo 
-echo "Grabbing Files Named passwd ,password ,cred.txt ,credential.txt"
+echo "Grabbing Credential Files"
 echo 
-find / -type f  \( -iname "passwd" -o -iname "password" -o -iname "cred.txt" -o -iname "credential.txt" \)  2>/dev/null
+find / -type f  \( -iname "passwd*" -o -iname "password*" -o -iname "cred*" \)  2>/dev/null
 
 
 echo 
@@ -286,10 +299,21 @@ timeout 120 grep -r 'BEGIN OPENSSH PRIVATE KEY\|BEGIN RSA PRIVATE KEY' / 2>/dev/
 
 
 echo 
-echo "Grabbing Files/Directory $(whoami) Can Read/Write"
+echo "Grabbing ForwardAgent"
+echo
+grep ForwardAgent /etc/ssh/ssh_config
+
+
+echo 
+echo "Grabbing Files $(whoami) Can Read"
 echo 
 find / -type f -readable  2> /dev/null  | grep -v '^/run\|^/sys\|^/proc\|^/usr\|^/boot\|^/snap\|^/etc'
-find / -writable  2> /dev/null
+
+
+echo 
+echo "Grabbing Files/Directory $(whoami) Can Write"
+echo 
+find / -writable  2>/dev/null
 
 
 start_year=$(stat /etc/passwd |grep Modify |awk '{print $2}' | awk -F"-" '{print $1}')
