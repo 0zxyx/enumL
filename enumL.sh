@@ -7,6 +7,9 @@ echo '==========================================================================
 echo 
 
 
+echo $PATH
+
+
 sudo -l
 
 
@@ -221,9 +224,9 @@ find /var/www/ \( -iname "*config.*" -o -iname "*db.*" \)  2>/dev/null
 
 
 echo 
-echo "Grabbing Passwords From /var/www, /home, /etc"
+echo "Grabbing Passwords From /home /var/www /etc /opt /usr/local/"
 echo 
-grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg}  -RioE '.{0,30}(pwd|passwd|password|dbuser|db_user|user|db_password|db_passwd|dbpass|dbpwd|database_pass|PWD|credential|token|postgresql|key).{0,30}' /home /var/www /etc /opt 2>/dev/null
+grep --exclude={*.css,*.js.map,*.css.map,*.min.map,*.svg}  -RioE '.{0,30}(pwd|passwd|password|dbuser|db_user|user|db_password|db_passwd|dbpass|dbpwd|database_pass|PWD|credential|token|postgresql|key).{0,30}' /home /var/www /etc /opt /usr/local/ 2>/dev/null
 
 
 echo 
@@ -299,10 +302,15 @@ timeout 120 grep -r 'BEGIN OPENSSH PRIVATE KEY\|BEGIN RSA PRIVATE KEY' / 2>/dev/
 
 
 echo 
-echo "Grabbing ForwardAgent"
+echo "Grabbing ssh Config"
 echo
-grep ForwardAgent /etc/ssh/ssh_config
+grep -v '^#' /etc/ssh/ssh_config
 
+
+echo 
+echo "Grabbing Kubernetes Token"
+echo
+cat /run/secrets/kubernetes.io/serviceaccount/token
 
 echo 
 echo "Grabbing Files $(whoami) Can Read"
